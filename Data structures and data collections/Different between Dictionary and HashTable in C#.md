@@ -1,6 +1,6 @@
 # Different between Dictionary and HashTable
-![](Pasted%20image%2020240703203025.png)
-![](Pasted%20image%2020240703201546.png)
+![](images/Pasted%20image%2020240703203025.png)
+![](images/Pasted%20image%2020240703201546.png)
 Above you look table which has different between these collections.
 That is important that dictionary is generic collection, because it is type-safe collection.
 Hashtable uses boxing/unboxing, so it is slower than dictionary.
