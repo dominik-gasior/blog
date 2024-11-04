@@ -22,25 +22,25 @@ Dowiesz się miedzy innymi:
    6. Kolejka
    7. Drzewo
    8. Graf
-2. Co to są kolekcje?
+2. Kolekcje
+   1. Co to są kolekcje?
+   2. Złożoność obliczeniowa
+   3. Dlaczego kolekcje dziedziczą po wielu interfejsach?
+   4. Interfejs IEnumerable i IEnumerator
+   5. Kolekcje generyczne i niegeneryczne
+   6. Thread-safe w kolekcjach
+3. Kolekcje niegeneryczne
    1. TODO
-3. Dlaczego kolekcje dziedziczą po wielu interfejsach?
+4. Kolekcje generyczne
    1. TODO
-4. Interfejs IEnumerable i IEnumerator
+5. Kolekcje thread-safe
    1. TODO
-5. Kolekcja generyczna i niegeneryczna
+6. Niestandardowe implementacje kolekcji w C#
    1. TODO
-6. Kolekcje niegeneryczne
-   1. TODO
-7. Kolekcje generyczne
-   1. TODO
-8. Thread-safe w kolekcjach
-   1. TODO
-9. Niestandardowe implementacje kolekcji w C#
-   1. TODO
-10. Własna kolekcja w C#
-    1. TODO
-11. Literatura
+7. Własna kolekcja w C#
+8. Benchmark kolekcji i struktur danych
+9. Porównywanie kolekcji i struktur danych
+10. Literatura
 
 ---
 
@@ -246,9 +246,155 @@ Grafy są najbardziej rozbudowaną strukturą danych i najbardziej zaawansowaną
 Przykład grafu:
 ![Przykładowy graf](Images/Directed_graph_no_background.svg.png)
 
-### 2 Co to są kolekcje?
+### 2.1 Co to są kolekcje?
 
-### 11. Literatura
+Kolekcje są to zbiory danych, które posiadają gotową implementację narzuconą przez twórce biblioteki. Kolekcja posiada określoną implementację na daną metodę.
+
+Np. metoda sortująca w kolekcji **A** może mieć inną implementacje (użyty algorytm) w kolekcji **B**.
+
+Każda kolekcja posiada swoje unikalne zastosowanie. W niektórych przypadkach użyjemy jednej kolekcji, a w innych nie. Musimy pamiętać, aby świadomie dobierać kolekcję do danego problemu. Kolekcje są, aby nam pomagać, niż utrudniać.
+
+Każdą kolekcję możemy nadpisać lub jeśli chcemy możemy utworzyć własną implementacje kolekcji.
+
+Kolekcje przechowują dane, jednak niektóre robią to w inny sposób narzucając klucz, który daje dostęp do danego obiektu lub typu wartościowego albo także ignoruje duplikaty. Są też kolekcje, które narzucają dany typ lub są generyczne (Przykłady List oraz List<T>).
+
+### 2.2 Złożoność obliczeniowa
+
+Kolekcje posiadają różną złożoność (Wielkie O) tzn. każda operacja może wyglądać inaczej na danej kolekcji. Jest to spowodowane tym, że każda kolekcja posiada swoją implementację, która może się różnić od innej implementacji w innej kolekcji oraz zastosowanej struktury danych.
+
+Np.
+Zczytywanie obiektu z Listy może trwać dłużej w najgorszym przypadku, niż w tablicy, która ma określony rozmiar.
+
+Co to znaczy najgorszy lub najlepszy przypadek?
+Opisuje to sytuację, w której algortm zachowa się najszybciej lub najwolniej.
+
+Wymieniamy kilka złożoności obliczeniowych:
+
+- O(1) – Stała złożoność czasowa
+  Algorytm działa zawsze w stałym czasie, niezależnie od rozmiaru danych wejściowych. Przykładem może być dostęp do elementu w tablicy za pomocą indeksu.
+
+- O(log n) – Logarytmiczna złożoność czasowa
+  Czas działania rośnie logarytmicznie wraz ze wzrostem rozmiaru danych. Przykładem jest wyszukiwanie binarne w posortowanej tablicy.
+
+- O(n) – Liniowa złożoność czasowa
+  Czas działania rośnie liniowo wraz z rozmiarem danych wejściowych. Przykładem może być przechodzenie przez wszystkie elementy tablicy lub listy.
+
+- O(n log n) – Liniowo-logarytmiczna złożoność czasowa
+  Algorytm rośnie szybciej niż liniowy, ale wolniej niż kwadratowy. Przykładem jest sortowanie szybkie (quicksort) lub sortowanie przez scalanie (merge sort).
+
+- O(n²) – Kwadratowa złożoność czasowa
+  Czas działania rośnie proporcjonalnie do kwadratu rozmiaru danych wejściowych. Przykładem może być sortowanie bąbelkowe.
+
+- O(2ⁿ) – Eksponencjalna złożoność czasowa
+  Czas działania rośnie wykładniczo wraz z rozmiarem danych, co czyni je bardzo nieefektywnymi dla większych zbiorów danych. Przykładem jest algorytm rekurencyjny dla problemu plecakowego (knapsack problem).
+
+- O(n!) – Silniowa złożoność czasowa
+  Czas działania rośnie proporcjonalnie do silni rozmiaru danych wejściowych, co czyni je niepraktycznymi dla większości problemów o większym rozmiarze. Przykładem jest algorytm przeszukiwania wszystkich permutacji, jak problem komiwojażera (travelling salesman problem).
+
+### 2.3 Dlaczego kolekcje dziedziczą po wielu interfejsach?
+
+Kolekcje dziedziczą po wielu interfesjach, dlatego aby wszystkie kolekcje były spójne z takimi metodami jak np. Add(), RemoveAt(), CopyTo().
+
+Używanie interfejsów daje nam większa swobodę w implementacji metod, które dana kolekcja będzie wykorzystywała nie narzucając jej implementacji, tylko uwzględniając nazwę metody oraz jej typy, które powinna owa kolekcja obsługiwać. Pozwala również na podmianę implementacji ze względu na to, że nie naruszymy poprawności naszego kodu.
+
+Wszystkie kolekcje dziedziczą po IEnumerable, więc wiadomo, że umożliwiają iteracje po elementach. Niektóre kolekcje tak jak Lista implementują IList, który pozwala na wykorzystywanie metod, które narzuca dany interfejs.
+
+Przykład:
+
+```csharp
+// Lista implementuje aż 8 interfejsów.
+public class List<T> :
+    IList<T>,
+    ICollection<T>,
+    IEnumerable<T>,
+    IEnumerable,
+    IList,
+    ICollection,
+    IReadOnlyList<T>,
+    IReadOnlyCollection<T>
+```
+
+Interfejs IList<T> narzuca implementację 3 metod oraz indexera.
+
+```csharp
+public interface IList<T> : ICollection<T>, IEnumerable<T>, IEnumerable
+{
+    T this[int index] { get; set; }
+    int IndexOf(T item);
+    void Insert(int index, T item);
+    void RemoveAt(int index);
+}
+```
+
+### 2.4 Interfejs IEnumerable i IEnumerator
+
+IEnumerable i IEnumerator umożliwiają nam iterowanie po danej kolekcji. Iterowanie oznacza przechodzenie element po elemencie w kolekcji.
+
+IEnumerable posiada tylko jedną metodę, która zwraca nam IEnumerator.
+
+```csharp
+  public interface IEnumerable
+  {
+    IEnumerator GetEnumerator();
+  }
+```
+
+IEnumerator natomiast narzuca nam implementację 3 metod, które będziemy wykorzystywać do przechodzenia po elementach w kolekcji:
+
+```csharp
+  public interface IEnumerator
+  {
+    bool MoveNext();
+    object Current { get; }
+    void Reset();
+  }
+```
+
+MoveNext -> przesuwa wskaźnik w pamięci do następnego elementu, jeśli istnieje.
+
+Current -> pobiera aktualny element na który wskazuje wskaźnik w pamięci.
+
+Reset -> ustawia wskaźnik na 0 miejscu, czyli na miejsce **przed pierwszym elementen w kolekcji**, dlatego, że kolekcja może być pusta.
+
+Bez implementacji IEnumerator nasza niestandardowa kolekcja nie będzie miała możliwości wykorzystania metody **foreach.**
+
+Jest różnica pomiędzy IEnumerator, a IEnumerator w wersji generycznej, taka, że wersja generyczna implementuje IDisposable do zwalniania zasobów, a wersja niegeryczna nie implementuje tego interfejsu.
+
+### 2.5 Kolekcje generyczne i niegeneryczne
+
+Kolekcje niegeneryczne to kolekcje, które umożliwiają przechowywanie różnych obiektów, wyróżniają się tym na tle kolekcji generycznych. Jednak mają swoją wadę, wydajność takich kolekcji jest mniejsza ze względu na to, że muszą rzutować każdy obiekt, co w kolekcjach generycznych nie ma miejsca, ze względu na to, że mają narzucony dany typ na starcie.
+
+Aktualnie kolekcje generyczne są nadal rozwijane dodawając im co raz to więcej ich implementacji, np. LinkedList.
+
+Poniżej obrazek przedstawiający kolekcje generyczne i ich odpowiedniki niegeneryczne:
+
+![kolekcje generyczne i ich odpowiedniki niegeneryczne](/Images/generyczne_niegeneryczne_kolekcje.PNG)
+
+### 2.6 Thread-safe w kolekcjach
+
+Thread-safe w kolekcjach oznacza, że możliwa jest praca z kolekcją dla wielu wątków. W przeszłości kolekcje niegeneryczne były z góry bezpieczne wątkowo, dlatego, że umożliwiały blokadę kolekcji do momentu dodania lub usunięcia elementu za pomocą Synchronized. Aktualnie posiadamy do tego kolekcje thread-safe. Ciekawostką jest to, że kolekcje generyczne nie posiadają już opcji Synchronized ze względu na to, że programiści Microsoft po konsultacjach z innymi stwierdzili, że lepiej zwykłe kolekcje zostawić jako jednowątkowe, a dla wielu wątków stworzyć nowe kolekcje, które zoptymalizują pracę na wielu wątkach. Starsza metoda Synchronized nie była wydajna i bardzo mało skalowalna i przy dużym ruchu do kolekcji potrafiła spowodować duże straty wydajności.
+
+#### TODO rozwinac bardziej.
+
+Ciekawostką jest to, ze klasy współbieżne implementują Synchronized i i SyncRoot, jednak zwracają stałe wartości:
+
+> Ponieważ klasy kolekcji współbieżnych obsługują interfejs ICollection, implementują one właściwości IsSynchronized i SyncRoot, nawet jeśli te właściwości są nieistotne. Właściwość IsSynchronized zawsze zwraca wartość false, a właściwość SyncRoot zawsze ma wartość null (Nothing w języku Visual Basic).
+
+### 3. Kolekcje niegeneryczne
+
+### 4. Kolekcje generyczne
+
+### 5. Kolekcje thread-safe
+
+### 6. Niestandardowe implementacje kolekcji w C#
+
+### 7. Własna kolekcja w C#
+
+### 8. Benchmark kolekcji i struktur danych
+
+### 9. Porównywanie kolekcji i struktur danych
+
+### 10. Literatura
 
 http://kurs.aspnetmvc.pl/Csharp/Tablice
 http://kurs.aspnetmvc.pl/Csharp/Lancuchy
